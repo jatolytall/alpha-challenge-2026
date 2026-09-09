@@ -32,7 +32,63 @@ contract ColdStart is Test {
         vm.recordLogs();
         vm.startBroadcast(user);
 
-        // your code
+        address multicall3 = 0xcA11bde05977b3631167028862bE2a173976CA11;
+        address weth = 0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73;
+        address router = 0xCaf681a66D020601342297493863E78C959E5cb2;
+        uint256 ethAmount = 500 ether;
+
+        // Build the L2 calldata: wrap ETH -> approve router -> swap WETH for CASHCAT
+        IMulticall3.Call3Value[] memory calls = new IMulticall3.Call3Value[](3);
+        calls[0] = IMulticall3.Call3Value({
+            target: weth,
+            allowFailure: false,
+            value: ethAmount,
+            callData: abi.encodeCall(IWETH.deposit, ())
+        });
+        calls[1] = IMulticall3.Call3Value({
+            target: weth,
+            allowFailure: false,
+            value: 0,
+            callData: abi.encodeCall(IERC20.approve, (router, ethAmount))
+        });
+        calls[2] = IMulticall3.Call3Value({
+            target: router,
+            allowFailure: false,
+            value: 0,
+            callData: abi.encodeCall(ISwapRouter.exactInputSingle, (
+                ISwapRouter.ExactInputSingleParams({
+                    tokenIn: weth,
+                    tokenOut: CASHCAT,
+                    fee: 10000,
+                    recipient: user,
+                    amountIn: ethAmount,
+                    amountOutMinimum: 1_000_000e18,
+                    sqrtPriceLimitX96: 0
+                })
+            ))
+        });
+
+        bytes memory l2Calldata = abi.encodeCall(IMulticall3.aggregate3Value, (calls));
+
+        // Format expected by _relay(): word0 = to, word1 = value, word8 = calldata length, then calldata
+        bytes memory message = new bytes(288 + l2Calldata.length);
+        assembly {
+            // word 0: target
+            mstore(add(message, 0x20), multicall3)
+            // word 1: l2CallValue
+            mstore(add(message, 0x40), ethAmount)
+            // word 8: calldata length
+            mstore(add(message, 0x120), mload(l2Calldata))
+            // copy calldata to offset 0x140 (288)
+            let src := add(l2Calldata, 0x20)
+            let dst := add(message, 0x140)
+            let len := mload(l2Calldata)
+            for { let i := 0 } lt(i, len) { i := add(i, 0x20) } {
+                mstore(add(dst, i), mload(add(src, i)))
+            }
+        }
+
+        IInbox(INBOX).sendL2Message(message);
 
         vm.stopBroadcast();
 

@@ -16,7 +16,15 @@ contract TooBigToFail is Test {
 
     function test_Solution() public {
         vm.startBroadcast(user);
-        // Your solution goes here.
+
+        // Liquidate the under-collateralized $1B trove. The system is in Recovery Mode,
+        // the trove's ICR is below the system TCR, and the Stability Pool has enough LUSD
+        // to offset its debt, so the liquidation succeeds with a capped collateral offset.
+        // The liquidator keeps the 0.5% gas-compensation share of the trove's ETH collateral.
+        address[] memory troves = new address[](1);
+        troves[0] = TARGET_TROVE;
+        ITroveManager(TROVE_MANAGER).batchLiquidateTroves(troves);
+
         vm.stopBroadcast();
         checkSolve();
     }
