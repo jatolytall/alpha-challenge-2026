@@ -25,6 +25,28 @@ Every RPC used is free and public:
 | X Layer | `https://rpc.xlayer.tech` |
 | Robinhood Chain | `https://rpc-robinhood.blockmachine.io` |
 
+### Reproducing the analysis, not just the answers
+
+Passing the checker only proves an answer is right. These scripts re-derive the
+underlying facts from live public data and fail loudly if anything drifts:
+
+```bash
+python3 repro/04_pool_history.py    # pulls the pool's full pre-snipe history
+```
+
+Sample output:
+
+```
+transactions in pool history before the first snipe: 15
+  slot 314590039  2025-01-17 14:19:03 UTC  2GcsWNeWVyYfiNybz9HQmiWv...
+  ...
+  slot 314597017  2025-01-17 15:06:47 UTC  4q2uYTeYzJFVuJB9Nqgs54rJ...
+first snipe: slot 314658584
+OK: the pool's entire pre-snipe history is 15 launch-team transactions
+```
+
+No dependencies beyond the Python standard library, and no keys.
+
 ## Highlights
 
 ### 07 — Firepit: an optimisation, not a pass/fail check
