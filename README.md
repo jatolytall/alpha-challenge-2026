@@ -1,5 +1,7 @@
 # Wintermute Alpha Challenge 2026
 
+[![verify](https://github.com/jatolytall/alpha-challenge-2026/actions/workflows/verify.yml/badge.svg)](https://github.com/jatolytall/alpha-challenge-2026/actions/workflows/verify.yml)
+
 All nine challenges solved, 900/900. This repository is less about the answers,
 which are the same for everyone who finishes, and more about the method: every
 result here is reproducible from a clean machine, and no step needs a paid or
