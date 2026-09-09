@@ -33,10 +33,12 @@ Passing the checker only proves an answer is right. These scripts re-derive the
 underlying facts from live public data and fail loudly if anything drifts:
 
 ```bash
-python3 repro/04_pool_history.py    # pulls the pool's full pre-snipe history
+python3 repro/04_pool_history.py    # the pool's full pre-snipe history
+python3 repro/07_pool_scan.py       # protocol fees on the pools actually used
+python3 repro/07_pool_scan.py --full-scan   # replays the whole factory scan
 ```
 
-Sample output:
+Sample output from `04_pool_history.py`:
 
 ```
 transactions in pool history before the first snipe: 15
@@ -45,6 +47,15 @@ transactions in pool history before the first snipe: 15
   slot 314597017  2025-01-17 15:06:47 UTC  4q2uYTeYzJFVuJB9Nqgs54rJ...
 first snipe: slot 314658584
 OK: the pool's entire pre-snipe history is 15 launch-team transactions
+```
+
+Sample output from `07_pool_scan.py`:
+
+```
+   1. 0x63d62734847E55A266FCa4219A9aD0a02D5F6e02  token0=7223814290   token1=86421010326695120621
+   2. 0xe1071DB4691b325c709854DC3D5CcD5d77e62Ed1  token0=13026540631  token1=37601194919851206379
+   ...
+pools carrying protocol fees: 12/12
 ```
 
 No dependencies beyond the Python standard library, and no keys.
