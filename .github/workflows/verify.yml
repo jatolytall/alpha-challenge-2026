@@ -1,0 +1,31 @@
+name: verify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      ETH_RPC_URL: https://rpc.mevblocker.io
+      XLAYER_RPC_URL: https://rpc.xlayer.tech
+      ROBINHOOD_RPC_URL: https://rpc-robinhood.blockmachine.io
+      ARB_RPC_URL: https://arb1.arbitrum.io/rpc
+      USER_ADDRESS: "0x6937971feb0fe24f963d3431eebb39d75c2087bf"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Score
+        run: python3 alpha.py check
